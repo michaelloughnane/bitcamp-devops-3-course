@@ -1,0 +1,16 @@
+title: BitCamp-DevOps-3
+description: 'A lesson on Continuous Deployment (CD), through GitHub Actions.'
+template:
+  repo: bitcamp-devops-3-template
+  name: bitcamp-devops-3
+before:
+  - type: createIssue
+    title: Welcome!
+    body: new-issue.md
+steps:
+  - title: First step
+    description: The first step in your course
+    event: issues.assigned
+    link: '{{ repoUrl }}'
+    actions:
+      - type: closeIssue
