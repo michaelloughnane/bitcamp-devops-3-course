@@ -1,12 +1,10 @@
 # Welcome
 
-Welcome to the Learning Lab course "Using GitHub Actions for CD". What is **CD**? If you don't already know, you'll find out soon! 
+A quick note of caution!
 
-Before you get started, it's important that you are comfortable with a few skills. We recommend going through the [Introduction to GitHub Learning Lab course](https://lab.github.com/githubtraining/introduction-to-github/) and the [Hello, GitHub Actions! Learning Lab course](https://lab.github.com/github/hello-github-actions!) before beginning this one. 
+This course requires your name to not contain any capital letters! It causes an error down the line. If your username contains a capital letter, it's recommended to change it now.
 
-Other experience with workflow automation will help, but are not necessary to complete this course.
-
-### Set up CI Workflow
+### Setting up CI Workflow
 
 #### What is CI?
 

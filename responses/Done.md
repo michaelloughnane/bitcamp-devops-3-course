@@ -18,4 +18,4 @@ To find projects to contribute to through trending topics and curated collection
 
 ### Keep learning
 
-[What will you learn next]({{ host }}/courses)?
+Next up, a lesson on writing your own Actions with Javascript!
