@@ -1,16 +1,170 @@
 title: BitCamp-DevOps-3
-description: 'A lesson on Continuous Deployment (CD), through GitHub Actions.'
+description: 'A lesson on deploying code, through GitHub Actions.'
 template:
   repo: bitcamp-devops-3-template
   name: bitcamp-devops-3
 before:
-  - type: createIssue
-    title: Welcome!
-    body: new-issue.md
+  - type: createPullRequest
+    title: Setting Up CI
+    body: 00_Setup-CI.md
+    head: ci-workflow
+    comments:
+      - 00.1_First-CI-Comment.md
+
 steps:
-  - title: First step
-    description: The first step in your course
-    event: issues.assigned
-    link: '{{ repoUrl }}'
+  # step 1
+  - title: Move the workflow file
+    description: Place the CI workflow file in the proper directory.
+    event: pull_request.synchronize
+    link: "{{ repoUrl }}/pull/1"
     actions:
-      - type: closeIssue
+      - type: getTree
+        action_id: tree
+        recursive: true
+        sha: "%payload.pull_request.head.sha%"
+
+      - type: gate
+        left: "%actions.tree.data.tree%"
+        operator: includes
+        right: "path:.github/workflows/ci-workflow.yml"
+        else:
+          - type: respond
+            with: 00.2_CI-Workflow-Fail.md
+
+      - type: mergePullRequest
+
+      - type: deleteBranch
+        branch: ci-workflow
+
+      - type: mergeBranch
+        head: master
+        base: docker-workflow
+
+      - type: createPullRequest
+        title: Docker Workflow
+        body: 01.0_Building-Docker-Images.md
+        head: docker-workflow
+        action_id: dockerworkflowpr
+        data:
+          workflowUrl: "%payload.repository.html_url%/edit/master/.github/workflows/ci-workflow.yml"
+        # workflowUrl sill not accessible in response below
+        # respond also breaks if a use a title vs number
+      - type: respond
+        with: 01.1_Docker-Workflow.md
+        # issue: Docker Workflow
+        issue: 2
+
+      - type: respond
+        with: 00.4_Next-Pull.md
+        issue: 1
+        data:
+          pullURL: "%actions.dockerworkflowpr.data.html_url%"
+
+  # step 2
+  - title: Edit the workflow file
+    description: Build the Docker workflow and 'secrets' configuration.
+    event: pull_request.synchronize
+    actions:
+      - type: getTree
+        action_id: tree
+        recursive: true
+        sha: "%payload.pull_request.head.sha%"
+
+      - type: gate
+        left: "%actions.tree.data.tree%"
+        operator: includes
+        right: "path:.github/workflows/cd-workflow.yml"
+        else:
+          - type: respond
+            with: 01.2_Docker-Workflow-Fail.md
+
+      - type: mergePullRequest
+
+      - type: deleteBranch
+        branch: docker-workflow
+
+      - type: mergeBranch
+        head: master
+        base: add-dockerfile
+
+      - type: createPullRequest
+        title: Add a Dockerfile
+        body: Dockerfile.md
+        head: add-dockerfile
+        action_id: dockerfile
+        comments:
+          - 01.3_Configure-Dockerfile.md
+
+      - type: respond
+        with: 00.4_Next-Pull.md
+        data:
+          pullURL: "%actions.dockerfile.data.html_url%"
+
+  # step 3
+  - title: Trigger the pipeline
+    description: Make a commit and watch the pipeline work through GitHub Actions.
+    event: pull_request.synchronize
+    actions:
+      - type: respond
+        with: 01.4_Trigger-Docker-Build.md
+
+  # step 4
+  - title: View the workflow
+    description: Verify whether the Docker workflow was successful.
+    event: check_suite.completed
+    actions:
+      - type: gate
+        gates:
+          - left: "%payload.check_suite.conclusion%"
+            operator: ===
+            right: "success"
+          - left: "%payload.check_suite.head_branch%"
+            operator: ===
+            right: "add-dockerfile"
+        every: true
+        else:
+          - type: respond
+            with: 01.5_Check-Suite-Fail.md
+            issue: Add a Dockerfile
+      # - type: gate
+      #   left: "%payload.check_suite.conclusion%"
+      #   operator: ===
+      #   right: "success"
+      #   else:
+      #     - type: respond
+      #       with: 01.5_Check-Suite-Fail.md
+      #       issue: Add a Dockerfile
+
+      - type: createIssue
+        title: Consuming The Newly Created Docker Image
+        body: 02.0_Pull-Run-Image.md
+        comments:
+          - 02.1_Docker-Login.md
+          - 02.2_Docker-Pull.md
+          - 02.3_Docker-Run.md
+          - Done.md
+        action_id: nextUrl
+
+      - type: respond
+        with: 01.6_Success.md
+        issue: Add a Dockerfile
+        data:
+          nextUrl: "%actions.nextUrl.data.html_url%"
+
+      - type: mergePullRequest
+        pullRequest: Add a Dockerfile
+
+      - type: deleteBranch
+        branch: add-dockerfile
+
+      - type: createIssue
+        title: Consuming The Newly Created Docker Image
+        body: 02.0_Pull-Run-Image.md
+        comments:
+          - 02.1_Docker-Login.md
+          - 02.2_Docker-Pull.md
+          - 02.3_Docker-Run.md
+          - Done.md
+        action_id: nextUrl
+tags: ["GitHub Actions", "GitHub Packages", "Deployment", "Workflows", "Docker"]
+#
