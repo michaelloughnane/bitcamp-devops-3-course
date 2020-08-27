@@ -26,6 +26,3 @@ Automated events take place throughout this process. These events can range from
 
 **Continuous delivery** (CD) is the natural "next phase" of **continuous integration** (CI). Setting up a CI workflow will show us the entire picture of our workflow.
 
-But, this is **NOT** a course on CI. We will not being going into detail on what CI means, or how to use CI with GitHub Actions.
-
-Wait! There's good news 👍! If you need a CI refresher you can take the [Using GitHub Actions for CI Learning Lab course](https://lab.github.com/githubtraining/github-actions:-continuous-integration) to get up to speed.
